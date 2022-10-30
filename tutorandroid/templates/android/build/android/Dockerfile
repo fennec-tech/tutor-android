@@ -2,9 +2,17 @@ FROM docker.io/ubuntu:20.04
 MAINTAINER Overhang.io <contact@overhang.io>
 
 ENV DEBIAN_FRONTEND=noninteractive
+{% if APT_PROXY -%}
+RUN echo 'Acquire::{{ APT_PROXY | url_part('scheme') }}::Proxy "{{ APT_PROXY }}";' \
+    > /etc/apt/apt.conf.d/00proxy 
+{%- endif %}
 RUN apt update && \
   apt upgrade -y && \
   apt install -y wget unzip git openjdk-8-jre openjdk-8-jdk
+
+{% if APT_PROXY -%}
+RUN rm /etc/apt/apt.conf.d/00proxy
+{%- endif %}
 
 RUN mkdir /app
 
